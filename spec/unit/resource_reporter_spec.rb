@@ -99,11 +99,11 @@ describe Chef::ResourceReporter do
         @exception = Exception.new
         @resource_reporter.run_failed(@exception)
       end
-      
+
       it "sets the run status to 'failure'" do
         @resource_reporter.status.should == "failure"
       end
-      
+
       it "keeps the exception data" do
         @resource_reporter.exception.should == @exception
       end
@@ -124,13 +124,13 @@ describe Chef::ResourceReporter do
 
       it "collects the desired state of the resource" do
         update_record = @resource_reporter.updated_resources.first
-        update_record.new_resource.should == @new_resource        
+        update_record.new_resource.should == @new_resource
       end
     end
 
     # TODO: make sure a resource that is skipped because of `not_if` doesn't
     # leave us in a bad state.
-    
+
     context "once the a resource's current state is loaded" do
       before do
         @resource_reporter.resource_action_start(@new_resource, :create)
@@ -158,12 +158,12 @@ describe Chef::ResourceReporter do
         it "collects the updated resource" do
           @resource_reporter.should have(1).updated_resources
         end
-        
+
         it "collects the old state of the resource" do
-          update_record = @resource_reporter.updated_resources.first          
+          update_record = @resource_reporter.updated_resources.first
           update_record.current_resource.should == @current_resource
         end
-        
+
         it "collects the new state of the resource" do
           update_record = @resource_reporter.updated_resources.first
           update_record.new_resource.should == @new_resource
@@ -177,19 +177,19 @@ describe Chef::ResourceReporter do
             @resource_reporter.resource_failed(@next_new_resource, :create, @exception)
             @resource_reporter.resource_completed(@next_new_resource)
           end
-          
+
           it "collects the desired state of the failed resource" do
             failed_resource_update = @resource_reporter.updated_resources.last
             failed_resource_update.new_resource.should == @next_new_resource
           end
-          
+
           it "does not have the current state of the failed resource" do
             failed_resource_update = @resource_reporter.updated_resources.last
             failed_resource_update.current_resource.should be_nil
           end
         end
       end
-    
+
       # Some providers, such as RemoteDirectory and some LWRPs use other
       # resources for their implementation. These should be hidden from reporting
       # since we only care about the top-level resource and not the sub-resources
@@ -220,7 +220,7 @@ describe Chef::ResourceReporter do
           @resource_reporter.resource_updated(@new_resource, :create)
           @resource_reporter.resource_completed(@new_resource)
         end
-        
+
         it "does not collect data about the nested resource" do
           @resource_reporter.should have(1).updated_resources
         end
@@ -233,16 +233,16 @@ describe Chef::ResourceReporter do
           @resource_reporter.resource_failed(@new_resource, :create, @exception)
           @resource_reporter.resource_completed(@new_resource)
         end
-        
+
         it "collects the resource as an updated resource" do
           @resource_reporter.should have(1).updated_resources
         end
-        
+
         it "collects the desired state of the resource" do
           update_record = @resource_reporter.updated_resources.first
           update_record.new_resource.should == @new_resource
         end
-        
+
         it "collects the current state of the resource" do
           update_record = @resource_reporter.updated_resources.first
           update_record.current_resource.should == @current_resource
@@ -261,7 +261,7 @@ describe Chef::ResourceReporter do
       @resource_reporter.node_load_completed(@node, :expanded_run_list, :config)
       @resource_reporter.run_started(@run_status)
     end
-    
+
     context "for a successful client run" do
       before do
         # TODO: add inputs to generate expected output.
@@ -542,71 +542,5 @@ describe Chef::ResourceReporter do
         @resource_reporter.run_completed(@node)
       end
     end
-
-<<<<<<< HEAD
-    context "after creating the run history document when summary_only is set to true" do
-      before do
-        response = {"uri"=>"https://example.com/reports/nodes/spitfire/runs/ABC123", "summary_only"=>"true"}
-        @rest_client.should_receive(:post_rest).
-          with("reports/nodes/spitfire/runs", {"action" => "begin", "start_time"=> @start_time.to_s}).
-          and_return(response)
-
-        @resource_reporter.node_load_completed(@node, :expanded_run_list, :config)
-        @resource_reporter.run_started(@run_status)
-      end
-
-      it "enables summary only reporting" do
-        @resource_reporter.summary_only.should == "true"
-      end
-
-      it "updates the run document with resource updates at the end of the run" do
-        # update some resources...
-        @resource_reporter.resource_action_start(@new_resource, :create)
-        @resource_reporter.resource_current_state_loaded(@new_resource, :create, @current_resource)
-        @resource_reporter.resource_updated(@new_resource, :create)
-
-        post_url = "reports/nodes/spitfire/runs/ABC123"
-        response = {"result"=>"ok"}
-
-        @rest_client.should_receive(:post_rest).ordered do |url, data|
-          url.should eq(post_url)
-          data.should have_key("action")
-          data["action"].should == "end"
-          data.should have_key("status")
-          data.should have_key("resources")
-          data["resources"].should == []
-          data.should have_key("total_res_count")
-          data["total_res_count"].should == "1"
-          data.should have_key("data")
-          data["data"].should == {}
-          data.should have_key("updated_res_count")
-          data["updated_res_count"].should == "0"
-          data.should have_key("post_size")
-          response
-        end
-
-        @resource_reporter.run_completed(@node)
-      end
-    end
-
-    context "after creating the run history document when summary_only is set to false" do
-      before do
-        response = {"uri"=>"https://example.com/reports/nodes/spitfire/runs/ABC123", "summary_only"=>"false"}
-        @rest_client.should_receive(:post_rest).
-          with("reports/nodes/spitfire/runs", {"action" => "begin", "start_time"=> @start_time.to_s}).
-          and_return(response)
-
-        @resource_reporter.node_load_completed(@node, :expanded_run_list, :config)
-        @resource_reporter.run_started(@run_status)
-      end
-
-      it "disables summary_only reporting" do
-        @resource_reporter.summary_only.should == "false"
-      end
-     end
-
-=======
->>>>>>> praj/off_of_runid/no_summary_only
   end
-
 end
