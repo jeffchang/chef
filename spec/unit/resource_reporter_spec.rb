@@ -543,6 +543,7 @@ describe Chef::ResourceReporter do
       end
     end
 
+<<<<<<< HEAD
     context "after creating the run history document when summary_only is set to true" do
       before do
         response = {"uri"=>"https://example.com/reports/nodes/spitfire/runs/ABC123", "summary_only"=>"true"}
@@ -604,6 +605,8 @@ describe Chef::ResourceReporter do
       end
      end
 
+=======
+>>>>>>> praj/off_of_runid/no_summary_only
   end
 
 end
